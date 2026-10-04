@@ -36,7 +36,8 @@ const rollsByLoft = computed(() => {
 
 const selectedDips = computed(() => {
   if (!selected.value) return []
-  return dips.value.filter((d) => d.rollCode === selected.value.rollCode)
+  // 按布卷 id 过滤：卷码在不同帆布间可重复，不能按卷码字符串跨间匹配
+  return dips.value.filter((d) => d.rollId === selected.value.id)
 })
 
 const recentFeed = computed(() => dips.value.slice(0, 12))

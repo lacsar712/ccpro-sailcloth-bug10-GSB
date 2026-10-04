@@ -56,25 +56,12 @@ class ClothRollSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"status": "新建布卷不能直接设为已固化"}
                 )
-            # 合并未提交字段到临时视角：用当前实例校验
-            twin = (
-                ClothRoll.objects.filter(roll_code=roll.roll_code)
-                .exclude(pk=roll.pk)
-                .order_by("id")
-                .first()
-            )
-            target = twin or roll
-            ok, msg = can_mark_roll_cured(target)
+            # 固化校验必须针对当前这一卷本身：卷码在不同帆布间可重复，
+            # 绝不能按卷码找到别间的卷来校验或改写
+            ok, msg = can_mark_roll_cured(roll)
             if not ok:
                 raise serializers.ValidationError({"status": msg})
-            self._cured_twin_id = twin.pk if twin else None
         return attrs
-
-    def update(self, instance, validated_data):
-        twin_id = getattr(self, "_cured_twin_id", None)
-        if twin_id:
-            instance = ClothRoll.objects.get(pk=twin_id)
-        return super().update(instance, validated_data)
 
 
 class DipRunSerializer(serializers.ModelSerializer):

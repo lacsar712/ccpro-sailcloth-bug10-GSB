@@ -35,12 +35,8 @@ class DipRunViewSet(viewsets.ModelViewSet):
         qs = DipRun.objects.select_related("roll", "roll__loft").all()
         roll_id = self.request.query_params.get("rollId")
         if roll_id:
-            roll = ClothRoll.objects.filter(pk=roll_id).first()
-            code = roll.roll_code if roll else None
-            if code:
-                qs = qs.filter(roll__roll_code=code)
-            else:
-                qs = qs.filter(roll_id=roll_id)
+            # 严格按布卷主键过滤：卷码在不同帆布间可重复，不能跨间匹配
+            qs = qs.filter(roll_id=roll_id)
         return qs
 
 
